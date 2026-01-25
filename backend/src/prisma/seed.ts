@@ -3,17 +3,14 @@ import {
   Role,
   OrganizationMode,
 } from '../../generated/prisma/client';
-import { Pool } from 'pg';
 import { PrismaPg } from '@prisma/adapter-pg';
 import * as bcrypt from 'bcrypt';
 import 'dotenv/config';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-});
-
 const prisma = new PrismaClient({
-  adapter: new PrismaPg(pool),
+  adapter: new PrismaPg({
+    connectionString: process.env.DATABASE_URL as string,
+  }),
 });
 
 async function main() {
@@ -68,6 +65,4 @@ main()
   })
   .finally(async () => {
     await prisma.$disconnect();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    pool.end();
   });
