@@ -15,7 +15,6 @@ datasource db {
 /*
  ENUMS
 */
-
 enum Role {
   SUPER_ADMIN
   ADMIN
@@ -29,10 +28,6 @@ enum OrganizationMode {
   SAAS
   LICENSE
 }
-
-/*
- CORE MODELS
-*/
 
 model User {
   id        String   @id @default(uuid())
@@ -51,22 +46,34 @@ model Organization {
   id        String   @id @default(uuid())
   name      String
   logoUrl   String?
-  slug String @unique
-  mode      OrganizationMode @default(SAAS)
+  slug      String   @unique
+
+  mode      OrganizationMode @default(LICENSE)
   isActive  Boolean @default(true)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  // Sécurité SaaS
-  expiresAt DateTime? // 💰 Fin d'abonnement ou de licence
 
-  users OrganizationUser[]
+  users     OrganizationUser[]
+  license   License?
 }
 
-/*
- RELATION USER <-> ORGANIZATION
- Roles & scopes live here
-*/
+model License {
+  id             String @id @default(uuid())
+
+  organizationId String @unique
+
+  key            String @unique
+  startsAt       DateTime
+  expiresAt      DateTime
+
+  maxUsers       Int
+  isActive       Boolean @default(true)
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+
+  createdAt      DateTime @default(now())
+}
 
 model OrganizationUser {
   id             String @id @default(uuid())
@@ -76,7 +83,6 @@ model OrganizationUser {
 
   role           Role
 
-  // scopes (future-ready)
   regionId       String?
   managerId      String?
 
